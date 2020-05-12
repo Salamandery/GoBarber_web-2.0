@@ -21,7 +21,7 @@ const SignUp: React.FC = () => {
       const schema = Yup.object().shape({
         name: Yup.string().required('Nome é obrigatório'),
         email: Yup.string()
-          .required('O Campo E-mail é obrigatório')
+          .required('E-mail é obrigatório')
           .email('Digite um E-mail válido'),
         password: Yup.string().min(6, 'Senha deve ser no mínimo 6 digitos'),
       });
