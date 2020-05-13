@@ -1,8 +1,10 @@
 import React, { useCallback, useRef } from 'react';
 import * as Yup from 'yup';
+
 import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
+import { useAuth } from '../../hooks/AuthContext';
 import { Container, Content, Background } from './styles';
 
 import Input from '../../components/Input';
@@ -12,28 +14,45 @@ import GetValidationError from '../../utils/getValidationErrors';
 
 import logo from '../../assets/logo.svg';
 
+interface FormData {
+  email: string;
+  password: string;
+}
+
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const HandlerSubmit = useCallback(async (data: object) => {
-    try {
-      formRef.current?.setErrors({});
 
-      const schema = Yup.object().shape({
-        email: Yup.string()
-          .required('E-mail é obrigatório')
-          .email('Digite um E-mail válido'),
-        password: Yup.string().required('Senha é obrigatório'),
-      });
+  const { signIn } = useAuth();
+  const HandlerSubmit = useCallback(
+    async (data: FormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
-    } catch (err) {
-      const errors = GetValidationError(err);
+        const schema = Yup.object().shape({
+          email: Yup.string()
+            .required('E-mail é obrigatório')
+            .email('Digite um E-mail válido'),
+          password: Yup.string().required('Senha é obrigatório'),
+        });
 
-      formRef.current?.setErrors(errors);
-    }
-  }, []);
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        signIn({
+          email: data.email,
+          password: data.password,
+        });
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = GetValidationError(err);
+
+          formRef.current?.setErrors(errors);
+        }
+      }
+    },
+    [signIn],
+  );
 
   return (
     <Container>
